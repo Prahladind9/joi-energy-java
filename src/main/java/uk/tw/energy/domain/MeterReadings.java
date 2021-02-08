@@ -2,6 +2,9 @@ package uk.tw.energy.domain;
 
 import java.util.List;
 
+/**
+ * Currently used as Model
+ */
 public class MeterReadings {
 
     private List<ElectricityReading> electricityReadings;

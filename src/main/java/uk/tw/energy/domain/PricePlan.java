@@ -5,6 +5,12 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * For given PricePlan - only during initialization - can we assign values
+ * Only getters - abstraction & encapsulation
+ *
+ * Move towards Dependency Injection should be easy
+ */
 public class PricePlan {
 
     private final String energySupplier;
@@ -31,6 +37,12 @@ public class PricePlan {
         return unitRate;
     }
 
+    /**
+     * 1) Price variation may occur, if given date falls under PeakTime
+     * 2) Else return the standard unitRate
+     * @param dateTime
+     * @return
+     */
     public BigDecimal getPrice(LocalDateTime dateTime) {
         return peakTimeMultipliers.stream()
                 .filter(multiplier -> multiplier.dayOfWeek.equals(dateTime.getDayOfWeek()))

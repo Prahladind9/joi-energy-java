@@ -25,6 +25,12 @@ public class MeterReadingController {
         this.meterReadingService = meterReadingService;
     }
 
+    /**
+     * 1) Check meterReadings is valid
+     * 2) Store/persist meterReadings in the meterReaderService
+     * @param meterReadings MeterReadings Model Data Representation
+     * @return
+     */
     @PostMapping("/store")
     public ResponseEntity storeReadings(@RequestBody MeterReadings meterReadings) {
         if (!isMeterReadingsValid(meterReadings)) {
