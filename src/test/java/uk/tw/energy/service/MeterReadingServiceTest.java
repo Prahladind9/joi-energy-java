@@ -2,14 +2,20 @@ package uk.tw.energy.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.tw.energy.builders.MeterReadingsBuilder;
+import uk.tw.energy.domain.MeterReadings;
+import uk.tw.energy.generator.ElectricityReadingsGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static uk.tw.energy.Constants.RANDOM_METER_ID;
 
 public class MeterReadingServiceTest {
+
 
     private MeterReadingService meterReadingService;
 
@@ -24,8 +30,15 @@ public class MeterReadingServiceTest {
     }
 
     @Test
-    public void givenMeterReadingThatExistsShouldReturnMeterReadings() {
-        meterReadingService.storeReadings("random-id", new ArrayList<>());
-        assertThat(meterReadingService.getReadings("random-id")).isEqualTo(Optional.of(new ArrayList<>()));
+    public void givenMeterIdThatExistsShouldReturnMeterReadings() {
+        meterReadingService.storeReadings(RANDOM_METER_ID, new ArrayList<>());
+        assertThat(meterReadingService.getReadings(RANDOM_METER_ID)).isEqualTo(Optional.of(new ArrayList<>()));
     }
+
+    @Test
+    public void givenMeterIdThatExistsXRecordsShouldReturnMeterReadingsOfSizeX(int recordsSize){
+        meterReadingService.storeReadings(RANDOM_METER_ID, new ElectricityReadingsGenerator().generate(recordsSize));
+        assertThat(meterReadingService.getReadings(RANDOM_METER_ID).get().size()).isEqualTo(recordsSize);
+    }
+
 }

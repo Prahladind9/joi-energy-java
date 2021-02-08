@@ -4,9 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static uk.tw.energy.Constants.RANDOM_METER_ID;
 
 public class AccountServiceTest {
 
@@ -26,5 +29,16 @@ public class AccountServiceTest {
     @Test
     public void givenTheSmartMeterIdReturnsThePricePlanId() throws Exception {
         assertThat(accountService.getPricePlanIdForSmartMeterId(SMART_METER_ID)).isEqualTo(PRICE_PLAN_ID);
+    }
+
+    @Test
+    public void givenTheSmartMeterIdDoesNotExistShouldReturnNull(){
+        assertNull(accountService.getPricePlanIdForSmartMeterId(RANDOM_METER_ID));
+    }
+
+    @Test
+    public void givenTheSmartMeterIdDoesNotExistAnyOperationPerformedShouldThrowNullPointer(){
+        assertThrows(NullPointerException.class,
+                () -> accountService.getPricePlanIdForSmartMeterId(RANDOM_METER_ID).toLowerCase(Locale.ROOT));
     }
 }

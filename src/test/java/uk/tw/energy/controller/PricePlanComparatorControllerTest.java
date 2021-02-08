@@ -50,6 +50,7 @@ public class PricePlanComparatorControllerTest {
     @Test
     public void shouldCalculateCostForMeterReadingsForEveryPricePlan() {
 
+        //1hr difference
         ElectricityReading electricityReading = new ElectricityReading(Instant.now().minusSeconds(3600), BigDecimal.valueOf(15.0));
         ElectricityReading otherReading = new ElectricityReading(Instant.now(), BigDecimal.valueOf(5.0));
         meterReadingService.storeReadings(SMART_METER_ID, Arrays.asList(electricityReading, otherReading));
