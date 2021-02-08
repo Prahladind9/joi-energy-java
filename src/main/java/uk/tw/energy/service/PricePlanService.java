@@ -24,6 +24,13 @@ public class PricePlanService {
         this.meterReadingService = meterReadingService;
     }
 
+    /**
+     * For the given PlanName - get all the MeterReadings & calculate cost for all the PricePlans
+     * return back - to compare and choose the best one
+     *
+     * @param smartMeterId
+     * @return
+     */
     public Optional<Map<String, BigDecimal>> getConsumptionCostOfElectricityReadingsForEachPricePlan(String smartMeterId) {
         Optional<List<ElectricityReading>> electricityReadings = meterReadingService.getReadings(smartMeterId);
 
@@ -35,6 +42,17 @@ public class PricePlanService {
                 Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));
     }
 
+    /**
+     * 1) calculateAverageReading = allReadings/countofReadings
+     * 2) calculateTimeElapsed = (max-min Readings Time) / 1hr
+     * 3) averagedCost/CostPerHour = avg/time > rounded half up > 1.5 to 2 & 1.1 to 1
+     *
+     * 4) avg cost for the given plan = averagedCost * unitRate
+     *
+     * @param electricityReadings
+     * @param pricePlan
+     * @return
+     */
     private BigDecimal calculateCost(List<ElectricityReading> electricityReadings, PricePlan pricePlan) {
         BigDecimal average = calculateAverageReading(electricityReadings);
         BigDecimal timeElapsed = calculateTimeElapsed(electricityReadings);
