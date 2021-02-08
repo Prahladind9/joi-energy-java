@@ -37,17 +37,19 @@ public class PricePlanComparatorController {
         Optional<Map<String, BigDecimal>> consumptionsForPricePlans =
                 pricePlanService.getConsumptionCostOfElectricityReadingsForEachPricePlan(smartMeterId);
 
-        if (!consumptionsForPricePlans.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (validateConsumptionsForPricePlans(consumptionsForPricePlans)) return ResponseEntity.notFound().build();
 
         Map<String, Object> pricePlanComparisons = new HashMap<>();
         pricePlanComparisons.put(PRICE_PLAN_ID_KEY, pricePlanId);
         pricePlanComparisons.put(PRICE_PLAN_COMPARISONS_KEY, consumptionsForPricePlans.get());
 
-        return consumptionsForPricePlans.isPresent()
+        return ResponseEntity.ok(pricePlanComparisons);
+
+        //Redundant below condition
+        /*return consumptionsForPricePlans.isPresent()
                 ? ResponseEntity.ok(pricePlanComparisons)
-                : ResponseEntity.notFound().build();
+                : ResponseEntity.notFound().build();*/
+
     }
 
     @GetMapping("/recommend/{smartMeterId}")
@@ -56,9 +58,7 @@ public class PricePlanComparatorController {
         Optional<Map<String, BigDecimal>> consumptionsForPricePlans =
                 pricePlanService.getConsumptionCostOfElectricityReadingsForEachPricePlan(smartMeterId);
 
-        if (!consumptionsForPricePlans.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        if (validateConsumptionsForPricePlans(consumptionsForPricePlans)) return ResponseEntity.notFound().build();
 
         List<Map.Entry<String, BigDecimal>> recommendations = new ArrayList<>(consumptionsForPricePlans.get().entrySet());
         recommendations.sort(Comparator.comparing(Map.Entry::getValue));
@@ -68,5 +68,14 @@ public class PricePlanComparatorController {
         }
 
         return ResponseEntity.ok(recommendations);
+    }
+
+
+    //refactored - assuming in future we can add more validations
+    private boolean validateConsumptionsForPricePlans(Optional<Map<String, BigDecimal>> consumptionsForPricePlans) {
+        if (!consumptionsForPricePlans.isPresent()) {
+            return true;
+        }
+        return false;
     }
 }
