@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class PricePlanService {
 
+    private static final double ONE_HOUR_SECONDS = 3600.0;
     private final List<PricePlan> pricePlans;
     private final MeterReadingService meterReadingService;
 
@@ -28,6 +29,8 @@ public class PricePlanService {
      * For the given PlanName - get all the MeterReadings & calculate cost for all the PricePlans
      * return back - to compare and choose the best one
      *
+     * One SmartMeterId - Many Readings > threadSafe; none of them change during method execution > can refactor calculateCost
+     *
      * @param smartMeterId
      * @return
      */
@@ -38,9 +41,33 @@ public class PricePlanService {
             return Optional.empty();
         }
 
+        final BigDecimal calculatedAvgReadingCost = calculateCost(electricityReadings.get());
+
         return Optional.of(pricePlans.stream().collect(
-                Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));
+                Collectors.toMap(PricePlan::getPlanName, t -> calculatedAvgReadingCost.multiply(t.getUnitRate())
+                )));
+
+        //Refactored code to improve efficiency
+        /*return Optional.of(pricePlans.stream().collect(
+                Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));*/
     }
+
+
+    /**
+     * 1) calculateAverageReading = allReadings/countofReadings
+     * 2) calculateTimeElapsed = (max-min Readings Time) / 1hr
+     * 3) averagedCost/CostPerHour = avg/time > rounded half up > 1.5 to 2 & 1.1 to 1
+     *
+     * @param electricityReadings
+     * @return
+     */
+    private BigDecimal calculateCost(List<ElectricityReading> electricityReadings) {
+        BigDecimal average = calculateAverageReading(electricityReadings);
+        BigDecimal timeElapsed = calculateTimeElapsed(electricityReadings);
+
+        return average.divide(timeElapsed, RoundingMode.HALF_UP);
+    }
+
 
     /**
      * 1) calculateAverageReading = allReadings/countofReadings
@@ -77,7 +104,7 @@ public class PricePlanService {
                 .max(Comparator.comparing(ElectricityReading::getTime))
                 .get();
 
-        return BigDecimal.valueOf(Duration.between(first.getTime(), last.getTime()).getSeconds() / 3600.0);
+        return BigDecimal.valueOf(Duration.between(first.getTime(), last.getTime()).getSeconds() / ONE_HOUR_SECONDS);
     }
 
 }
