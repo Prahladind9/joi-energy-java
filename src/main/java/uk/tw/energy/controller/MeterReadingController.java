@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.tw.energy.domain.ElectricityReading;
 import uk.tw.energy.domain.MeterReadings;
 import uk.tw.energy.service.ElectricityMeterMeterReadingService;
 import uk.tw.energy.service.MeterReadingService;
@@ -18,7 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/readings")
-public class MeterReadingController {
+public class MeterReadingController<IN extends MeterReadings, OUT> {
 
     private final MeterReadingService meterReadingService;
 
@@ -33,7 +32,7 @@ public class MeterReadingController {
      * @return
      */
     @PostMapping("/store")
-    public ResponseEntity storeReadings(@RequestBody MeterReadings meterReadings) {
+    public ResponseEntity storeReadings(@RequestBody IN meterReadings) {
         if (!isMeterReadingsValid(meterReadings)) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -41,16 +40,16 @@ public class MeterReadingController {
         return ResponseEntity.ok().build();
     }
 
-    private boolean isMeterReadingsValid(MeterReadings meterReadings) {
+    private boolean isMeterReadingsValid(IN meterReadings) {
         String smartMeterId = meterReadings.getSmartMeterId();
-        List<ElectricityReading> electricityReadings = meterReadings.getElectricityReadings();
+        List<OUT> electricityReadings = meterReadings.getElectricityReadings();
         return smartMeterId != null && !smartMeterId.isEmpty()
                 && electricityReadings != null && !electricityReadings.isEmpty();
     }
 
     @GetMapping("/read/{smartMeterId}")
     public ResponseEntity readReadings(@PathVariable String smartMeterId) {
-        Optional<List<ElectricityReading>> readings = meterReadingService.getReadings(smartMeterId);
+        Optional<List<OUT>> readings = meterReadingService.getReadings(smartMeterId);
         return readings.isPresent()
                 ? ResponseEntity.ok(readings.get())
                 : ResponseEntity.notFound().build();
