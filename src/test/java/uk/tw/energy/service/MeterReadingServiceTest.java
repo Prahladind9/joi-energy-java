@@ -2,13 +2,10 @@ package uk.tw.energy.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.tw.energy.builders.MeterReadingsBuilder;
-import uk.tw.energy.domain.MeterReadings;
 import uk.tw.energy.generator.ElectricityReadingsGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -16,7 +13,7 @@ import static uk.tw.energy.Constants.RANDOM_METER_ID;
 
 public class MeterReadingServiceTest {
 
-
+    private final int RECORD_SIZE = 2;
     private MeterReadingService meterReadingService;
 
     @BeforeEach
@@ -36,9 +33,9 @@ public class MeterReadingServiceTest {
     }
 
     @Test
-    public void givenMeterIdThatExistsXRecordsShouldReturnMeterReadingsOfSizeX(int recordsSize){
-        meterReadingService.storeReadings(RANDOM_METER_ID, new ElectricityReadingsGenerator().generate(recordsSize));
-        assertThat(meterReadingService.getReadings(RANDOM_METER_ID).get().size()).isEqualTo(recordsSize);
+    public void givenMeterIdThatExistsXRecordsShouldReturnMeterReadingsOfSizeX(){
+        meterReadingService.storeReadings(RANDOM_METER_ID, new ElectricityReadingsGenerator().generate(RECORD_SIZE));
+        assertThat(meterReadingService.getReadings(RANDOM_METER_ID).get().size()).isEqualTo(RECORD_SIZE);
     }
 
 }
