@@ -5,19 +5,19 @@ import java.util.List;
 /**
  * Currently used as Model
  */
-public class MeterReadings {
+public class MeterReadings<T> {
 
-    private List<ElectricityReading> electricityReadings;
+    private List<T> electricityReadings;
     private String smartMeterId;
 
     public MeterReadings() { }
 
-    public MeterReadings(String smartMeterId, List<ElectricityReading> electricityReadings) {
+    public MeterReadings(String smartMeterId, List<T> electricityReadings) {
         this.smartMeterId = smartMeterId;
         this.electricityReadings = electricityReadings;
     }
 
-    public List<ElectricityReading> getElectricityReadings() {
+    public List<T> getElectricityReadings() {
         return electricityReadings;
     }
 
