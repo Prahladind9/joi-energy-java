@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.tw.energy.domain.ElectricityReading;
 import uk.tw.energy.domain.MeterReadings;
+import uk.tw.energy.service.ElectricityMeterMeterReadingService;
 import uk.tw.energy.service.MeterReadingService;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class MeterReadingController {
 
     private final MeterReadingService meterReadingService;
 
-    public MeterReadingController(MeterReadingService meterReadingService) {
-        this.meterReadingService = meterReadingService;
+    public MeterReadingController(ElectricityMeterMeterReadingService electricityMeterReadingService) {
+        this.meterReadingService = electricityMeterReadingService;
     }
 
     /**

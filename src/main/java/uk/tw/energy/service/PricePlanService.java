@@ -18,11 +18,11 @@ public class PricePlanService {
 
     private static final double ONE_HOUR_SECONDS = 3600.0;
     private final List<PricePlan> pricePlans;
-    private final MeterReadingService meterReadingService;
+    private final ElectricityMeterMeterReadingService electricityMeterReadingService;
 
-    public PricePlanService(List<PricePlan> pricePlans, MeterReadingService meterReadingService) {
+    public PricePlanService(List<PricePlan> pricePlans, ElectricityMeterMeterReadingService electricityMeterReadingService) {
         this.pricePlans = pricePlans;
-        this.meterReadingService = meterReadingService;
+        this.electricityMeterReadingService = electricityMeterReadingService;
     }
 
     /**
@@ -35,7 +35,7 @@ public class PricePlanService {
      * @return
      */
     public Optional<Map<String, BigDecimal>> getConsumptionCostOfElectricityReadingsForEachPricePlan(String smartMeterId) {
-        Optional<List<ElectricityReading>> electricityReadings = meterReadingService.getReadings(smartMeterId);
+        Optional<List<ElectricityReading>> electricityReadings = electricityMeterReadingService.getReadings(smartMeterId);
 
         if (!electricityReadings.isPresent()) {
             return Optional.empty();
