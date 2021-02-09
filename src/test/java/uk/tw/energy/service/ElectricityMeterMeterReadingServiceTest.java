@@ -33,7 +33,8 @@ public class ElectricityMeterMeterReadingServiceTest {
     }
 
     @Test
-    public void givenMeterIdThatExistsXRecordsShouldReturnMeterReadingsOfSizeX(int recordsSize){
+    public void givenMeterIdThatExistsXRecordsShouldReturnMeterReadingsOfSizeX(){
+        final int recordsSize = 2;
         electricityMeterReadingService.storeReadings(RANDOM_METER_ID, new ElectricityReadingsGenerator().generate(recordsSize));
         assertThat(electricityMeterReadingService.getReadings(RANDOM_METER_ID).get().size()).isEqualTo(recordsSize);
     }
