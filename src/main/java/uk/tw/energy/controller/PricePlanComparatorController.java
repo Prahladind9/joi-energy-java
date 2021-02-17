@@ -21,7 +21,9 @@ import java.util.Optional;
 @RequestMapping("/price-plans")
 public class PricePlanComparatorController {
 
+    public static final int LAST_WEEK_DAYS = 7;
     public final static String PRICE_PLAN_ID_KEY = "pricePlanId";
+    public final static String PRICE_PLAN_COST_KEY = "pricePlanCost";
     public final static String PRICE_PLAN_COMPARISONS_KEY = "pricePlanComparisons";
     private final PricePlanService pricePlanService;
     private final AccountService accountService;
@@ -29,6 +31,23 @@ public class PricePlanComparatorController {
     public PricePlanComparatorController(PricePlanService pricePlanService, AccountService accountService) {
         this.pricePlanService = pricePlanService;
         this.accountService = accountService;
+    }
+
+    @GetMapping("/costForLastWeek/{smartMeterId}")
+    public ResponseEntity<Map<String, Object>> calculatedCostForEachPricePlanForLastWeek(@PathVariable String smartMeterId) {
+        String pricePlanId = accountService.getPricePlanIdForSmartMeterId(smartMeterId);
+        Optional<BigDecimal> consumptionForPricePlan =
+                pricePlanService.getConsumptionCostOfElectricityReadingsForPricePlanForGivenDays(smartMeterId, pricePlanId, LAST_WEEK_DAYS);
+
+        if (!consumptionForPricePlan.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Map<String, Object> pricePlanComparisons = new HashMap<>();
+        pricePlanComparisons.put(PRICE_PLAN_ID_KEY, pricePlanId);
+        pricePlanComparisons.put(PRICE_PLAN_COST_KEY, consumptionForPricePlan.get());
+
+        return ResponseEntity.ok(pricePlanComparisons);
     }
 
     @GetMapping("/compare-all/{smartMeterId}")
@@ -45,9 +64,10 @@ public class PricePlanComparatorController {
         pricePlanComparisons.put(PRICE_PLAN_ID_KEY, pricePlanId);
         pricePlanComparisons.put(PRICE_PLAN_COMPARISONS_KEY, consumptionsForPricePlans.get());
 
-        return consumptionsForPricePlans.isPresent()
-                ? ResponseEntity.ok(pricePlanComparisons)
-                : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(pricePlanComparisons);
+//        return consumptionsForPricePlans.isPresent()
+//                ? ResponseEntity.ok(pricePlanComparisons)
+//                : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/recommend/{smartMeterId}")

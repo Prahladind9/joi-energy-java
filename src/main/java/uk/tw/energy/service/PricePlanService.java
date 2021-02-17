@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class PricePlanService {
 
+    public static final double ONE_HOUR_IN_SECONDS = 3600.0;
     private final List<PricePlan> pricePlans;
     private final MeterReadingService meterReadingService;
 
@@ -24,16 +25,61 @@ public class PricePlanService {
         this.meterReadingService = meterReadingService;
     }
 
+
+    /**
+     * 1) Last 7 days readings
+     * 2) Calcualte the avg for all the readings
+     * 3) Calcualte the cost for the given plan id
+     *
+     * @param smartMeterId
+     * @param pricePlanId
+     * @param days
+     * @return
+     */
+    public Optional<BigDecimal> getConsumptionCostOfElectricityReadingsForPricePlanForGivenDays(String smartMeterId, String pricePlanId, int days) {
+        Optional<List<ElectricityReading>> electricityReadings =
+                meterReadingService.getReadingsForSmartMeterIdForDays(smartMeterId, days);
+        System.out.println("electricityReadings>> "+ electricityReadings.get());
+        if (!electricityReadings.isPresent()) {
+            return Optional.empty();
+        }
+
+        final BigDecimal calculatedAvgReadingCost = calculatedAvgReadingCost(electricityReadings.get());
+        System.out.println("calculatedAvgReadingCost>> "+ calculatedAvgReadingCost);
+
+        return Optional.of(pricePlans.stream()
+                .filter(t -> t.getPlanName().equals(pricePlanId))
+                .map(t -> calculatedAvgReadingCost.multiply(t.getUnitRate()))
+                .collect(Collectors.toList()).get(0));
+
+    }
+
     public Optional<Map<String, BigDecimal>> getConsumptionCostOfElectricityReadingsForEachPricePlan(String smartMeterId) {
-        Optional<List<ElectricityReading>> electricityReadings = meterReadingService.getReadings(smartMeterId);
+        Optional<List<ElectricityReading>> electricityReadings = meterReadingService.getReadingsForSmartMeterIdForDays(smartMeterId);
 
         if (!electricityReadings.isPresent()) {
             return Optional.empty();
         }
 
+        final BigDecimal calculatedAvgReadingCost = calculatedAvgReadingCost(electricityReadings.get());
+
         return Optional.of(pricePlans.stream().collect(
-                Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));
+                Collectors.toMap(PricePlan::getPlanName, t -> calculatedAvgReadingCost.multiply(t.getUnitRate())
+                )));
+
+        //Commented & improved the performance in the above steps
+        /*return Optional.of(pricePlans.stream().collect(
+                Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));*/
     }
+
+
+    private BigDecimal calculatedAvgReadingCost(List<ElectricityReading> electricityReadings) {
+        BigDecimal average = calculateAverageReading(electricityReadings);
+        BigDecimal timeElapsed = calculateTimeElapsed(electricityReadings);
+
+        return average.divide(timeElapsed, RoundingMode.HALF_UP);
+    }
+
 
     private BigDecimal calculateCost(List<ElectricityReading> electricityReadings, PricePlan pricePlan) {
         BigDecimal average = calculateAverageReading(electricityReadings);
@@ -59,7 +105,7 @@ public class PricePlanService {
                 .max(Comparator.comparing(ElectricityReading::getTime))
                 .get();
 
-        return BigDecimal.valueOf(Duration.between(first.getTime(), last.getTime()).getSeconds() / 3600.0);
+        return BigDecimal.valueOf(Duration.between(first.getTime(), last.getTime()).getSeconds() / ONE_HOUR_IN_SECONDS);
     }
 
 }
